@@ -1,0 +1,33 @@
+{
+  "model": "PatchTST",
+  "dataset": "ETTm1",
+  "seq_len": 336,
+  "pred_len": 96,
+  "enc_in": 7,
+  "test_mse": 0.3456209897994995,
+  "test_mae": 0.37987613677978516,
+  "test_rmse": 0.587895393371582,
+  "val_mse": 0.36512184143066406,
+  "val_mae": 0.40199947357177734,
+  "val_rmse": 0.6042531132698059,
+  "n_params": 922464,
+  "best_epoch": 10,
+  "total_epochs_run": 20,
+  "total_train_time_sec": 749.0105051994324,
+  "avg_epoch_time_sec": 37.44268670082092,
+  "config": {
+    "patch_len": 16,
+    "stride": 8
+  },
+  "batch_size": 32,
+  "lr": 0.0001,
+  "patience": 10,
+  "optimizer": "Adam",
+  "scheduler": "OneCycleLR",
+  "loss": "MSE",
+  "train_size": 34560,
+  "val_size": 11520,
+  "test_size": 23600,
+  "channel_names": null,
+  "save_artifacts": "standard"
+}

@@ -1,0 +1,33 @@
+{
+  "model": "PatchTST",
+  "dataset": "Weather",
+  "seq_len": 336,
+  "pred_len": 336,
+  "enc_in": 21,
+  "test_mse": 0.25155606865882874,
+  "test_mae": 0.27990004420280457,
+  "test_rmse": 0.5015536546707153,
+  "val_mse": 0.5775562524795532,
+  "val_mae": 0.39017149806022644,
+  "val_rmse": 0.7599712014198303,
+  "n_params": 2212944,
+  "best_epoch": 19,
+  "total_epochs_run": 29,
+  "total_train_time_sec": 3236.343371629715,
+  "avg_epoch_time_sec": 111.55192764874162,
+  "config": {
+    "patch_len": 16,
+    "stride": 8
+  },
+  "batch_size": 32,
+  "lr": 0.0001,
+  "patience": 10,
+  "optimizer": "Adam",
+  "scheduler": "OneCycleLR",
+  "loss": "MSE",
+  "train_size": 36887,
+  "val_size": 5269,
+  "test_size": 10540,
+  "channel_names": null,
+  "save_artifacts": "standard"
+}

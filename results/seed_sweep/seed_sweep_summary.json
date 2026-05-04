@@ -1,0 +1,178 @@
+[
+  {
+    "dataset": "ETTh1",
+    "pred_len": 96,
+    "n_runs": 3,
+    "seeds": [
+      2021,
+      2022,
+      2023
+    ],
+    "mean_test_mse": 0.4435051580270131,
+    "std_test_mse": 0.001526172365390329,
+    "min_test_mse": 0.44155848026275635,
+    "max_test_mse": 0.44528573751449585,
+    "mean_test_mae": 0.44371842344601947,
+    "std_test_mae": 0.0017716491375787706,
+    "min_test_mae": 0.44211313128471375,
+    "max_test_mae": 0.44618701934814453,
+    "paper_mse": 0.375,
+    "paper_mae": 0.399,
+    "delta_mse_vs_paper": 0.06850515802701312,
+    "delta_mae_vs_paper": 0.04471842344601945
+  },
+  {
+    "dataset": "ETTh1",
+    "pred_len": 192,
+    "n_runs": 3,
+    "seeds": [
+      2021,
+      2022,
+      2023
+    ],
+    "mean_test_mse": 0.4938696622848511,
+    "std_test_mse": 0.0011073858971001327,
+    "min_test_mse": 0.4924057424068451,
+    "max_test_mse": 0.49508345127105713,
+    "mean_test_mae": 0.47542087237040204,
+    "std_test_mae": 0.0010150056630456599,
+    "min_test_mae": 0.47404441237449646,
+    "max_test_mae": 0.4764617681503296,
+    "paper_mse": 0.414,
+    "paper_mae": 0.421,
+    "delta_mse_vs_paper": 0.0798696622848511,
+    "delta_mae_vs_paper": 0.05442087237040205
+  },
+  {
+    "dataset": "ETTh1",
+    "pred_len": 336,
+    "n_runs": 3,
+    "seeds": [
+      2021,
+      2022,
+      2023
+    ],
+    "mean_test_mse": 0.5424770712852478,
+    "std_test_mse": 0.0005596338407239321,
+    "min_test_mse": 0.5418593883514404,
+    "max_test_mse": 0.5432144403457642,
+    "mean_test_mae": 0.5080210367838541,
+    "std_test_mae": 7.616734079107563e-05,
+    "min_test_mae": 0.5079272389411926,
+    "max_test_mae": 0.5081138014793396,
+    "paper_mse": 0.431,
+    "paper_mae": 0.436,
+    "delta_mse_vs_paper": 0.11147707128524781,
+    "delta_mae_vs_paper": 0.07202103678385413
+  },
+  {
+    "dataset": "ETTh1",
+    "pred_len": 720,
+    "n_runs": 3,
+    "seeds": [
+      2021,
+      2022,
+      2023
+    ],
+    "mean_test_mse": 0.6626899242401123,
+    "std_test_mse": 0.004111045803100495,
+    "min_test_mse": 0.6568760275840759,
+    "max_test_mse": 0.665597677230835,
+    "mean_test_mae": 0.5838701128959656,
+    "std_test_mae": 0.0025915329753246905,
+    "min_test_mae": 0.5802123546600342,
+    "max_test_mae": 0.5858981609344482,
+    "paper_mse": 0.449,
+    "paper_mae": 0.466,
+    "delta_mse_vs_paper": 0.2136899242401123,
+    "delta_mae_vs_paper": 0.11787011289596555
+  },
+  {
+    "dataset": "ETTm1",
+    "pred_len": 96,
+    "n_runs": 3,
+    "seeds": [
+      2021,
+      2022,
+      2023
+    ],
+    "mean_test_mse": 0.3487687309583028,
+    "std_test_mse": 0.0018269790302338673,
+    "min_test_mse": 0.34733331203460693,
+    "max_test_mse": 0.3513469398021698,
+    "mean_test_mae": 0.3802161415417989,
+    "std_test_mae": 0.001825612306683742,
+    "min_test_mae": 0.37806436419487,
+    "max_test_mae": 0.382527619600296,
+    "paper_mse": 0.29,
+    "paper_mae": 0.342,
+    "delta_mse_vs_paper": 0.05876873095830282,
+    "delta_mae_vs_paper": 0.038216141541798865
+  },
+  {
+    "dataset": "ETTm1",
+    "pred_len": 192,
+    "n_runs": 3,
+    "seeds": [
+      2021,
+      2022,
+      2023
+    ],
+    "mean_test_mse": 0.3941555718580882,
+    "std_test_mse": 0.0007807969987744502,
+    "min_test_mse": 0.39307233691215515,
+    "max_test_mse": 0.3948827087879181,
+    "mean_test_mae": 0.4112861156463623,
+    "std_test_mae": 0.000468098497228626,
+    "min_test_mae": 0.4106389582157135,
+    "max_test_mae": 0.4117303788661957,
+    "paper_mse": 0.332,
+    "paper_mae": 0.369,
+    "delta_mse_vs_paper": 0.06215557185808818,
+    "delta_mae_vs_paper": 0.04228611564636231
+  },
+  {
+    "dataset": "ETTm1",
+    "pred_len": 336,
+    "n_runs": 3,
+    "seeds": [
+      2021,
+      2022,
+      2023
+    ],
+    "mean_test_mse": 0.4378018279870351,
+    "std_test_mse": 0.001064984928263225,
+    "min_test_mse": 0.43643099069595337,
+    "max_test_mse": 0.4390275180339813,
+    "mean_test_mae": 0.43918414910634357,
+    "std_test_mae": 0.0010592051401747495,
+    "min_test_mae": 0.4376920759677887,
+    "max_test_mae": 0.44004490971565247,
+    "paper_mse": 0.366,
+    "paper_mae": 0.392,
+    "delta_mse_vs_paper": 0.0718018279870351,
+    "delta_mae_vs_paper": 0.047184149106343554
+  },
+  {
+    "dataset": "ETTm1",
+    "pred_len": 720,
+    "n_runs": 3,
+    "seeds": [
+      2021,
+      2022,
+      2023
+    ],
+    "mean_test_mse": 0.49949221809705097,
+    "std_test_mse": 0.0004824250813514466,
+    "min_test_mse": 0.49906644225120544,
+    "max_test_mse": 0.5001667737960815,
+    "mean_test_mae": 0.47523478666941327,
+    "std_test_mae": 0.00019150530587696266,
+    "min_test_mae": 0.47499987483024597,
+    "max_test_mae": 0.4754689633846283,
+    "paper_mse": 0.42,
+    "paper_mae": 0.424,
+    "delta_mse_vs_paper": 0.07949221809705098,
+    "delta_mae_vs_paper": 0.05123478666941328
+  }
+]
