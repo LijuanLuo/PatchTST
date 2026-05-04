@@ -911,6 +911,15 @@ def _load_clean_results(results_file):
     return [r for r in results if 'error' not in r]
 
 
+def _save_png_and_svg(path, dpi=220, **kwargs):
+    """Save the current matplotlib figure as both PNG and SVG."""
+    plt.savefig(path, dpi=dpi, **kwargs)
+    svg_path = os.path.splitext(path)[0] + '.svg'
+    plt.savefig(svg_path, format='svg', **kwargs)
+    print(f"Saved: {path}")
+    print(f"Saved: {svg_path}")
+
+
 def plot_benchmark_trends(results_dir='./results', save_dir='./results', datasets=None):
     """
     Poster-first benchmark figure: line plot of MSE vs horizon.
@@ -973,9 +982,8 @@ def plot_benchmark_trends(results_dir='./results', save_dir='./results', dataset
     fig.suptitle('Benchmark Trends: MSE vs Forecast Horizon', fontsize=15, fontweight='bold')
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     path = os.path.join(save_dir, 'benchmark_trends.png')
-    plt.savefig(path, dpi=220, bbox_inches='tight')
+    _save_png_and_svg(path, dpi=220, bbox_inches='tight')
     plt.close()
-    print(f"Saved: {path}")
 
 
 def plot_gap_to_paper_heatmap(our_results_dir='./results', save_dir='./results'):
@@ -1221,9 +1229,8 @@ def plot_ablation_single_panel(results_dir='./results/ablation',
 
     plt.tight_layout()
     path = os.path.join(save_dir, f'ablation_{dataset}_{pred_len}_single.png')
-    plt.savefig(path, dpi=220, bbox_inches='tight')
+    _save_png_and_svg(path, dpi=220, bbox_inches='tight')
     plt.close()
-    print(f"Saved: {path}")
 
 
 def plot_results_vs_paper(our_results_dir='./results', save_dir='./results'):
@@ -1907,9 +1914,8 @@ def plot_favorita_category_forecast(checkpoint_path, data_path='./data',
     plt.tight_layout()
     safe_name = category_name.lower().replace(' ', '_').replace('/', '_')
     path = os.path.join(save_dir, f'favorita_forecast_{safe_name}_pred{pred_len}.png')
-    plt.savefig(path, dpi=220, bbox_inches='tight')
+    _save_png_and_svg(path, dpi=220, bbox_inches='tight')
     plt.close()
-    print(f"Saved: {path}")
     print(f"  Category: {category_name} | sample_idx={idx} | window_mse={future_mse[idx]:.3f}")
     return path, category_name, idx
 
@@ -2114,9 +2120,8 @@ def plot_favorita_trends(results_dir='./results/favorita',
 
     plt.tight_layout()
     path = os.path.join(save_dir, 'favorita_trends.png')
-    plt.savefig(path, dpi=220, bbox_inches='tight')
+    _save_png_and_svg(path, dpi=220, bbox_inches='tight')
     plt.close()
-    print(f"Saved: {path}")
 
 
 def plot_favorita_lollipop(results_dir='./results/favorita',
