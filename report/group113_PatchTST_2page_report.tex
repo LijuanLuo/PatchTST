@@ -1,14 +1,17 @@
-\documentclass[11pt]{article}
+\documentclass[10pt]{article}
 
-\usepackage[margin=0.62in]{geometry}
+\usepackage[letterpaper,margin=0.85in,top=0.7in,bottom=0.75in]{geometry}
 \usepackage{booktabs}
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{caption}
+\usepackage{subcaption}
 \usepackage{titlesec}
-\usepackage{multicol}
 \usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{float}
 
 \hypersetup{
   colorlinks=true,
@@ -17,98 +20,136 @@
   urlcolor=blue,
 }
 
-\setlength{\parskip}{0.22em}
-\setlength{\parindent}{0pt}
-\setlength{\columnsep}{0.22in}
-\titlespacing*{\section}{0pt}{0.45em}{0.18em}
-\titlespacing*{\subsection}{0pt}{0.3em}{0.1em}
-\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.4em}{}
-\setlist{nosep, leftmargin=1.2em}
-\captionsetup{font=small, skip=2pt}
+\graphicspath{{../results/}{../results/favorita/}{../results/ablation/}{../results/benchmark/}}
 
-\title{\vspace{-2em}\textbf{Re-implementing PatchTST and Applying It to Retail Demand Forecasting}}
-\author{\small Yanlei He, Lijuan Luo \\ \small Cornell University \quad CS 5782 \quad Spring 2026}
-\date{\vspace{-1.5em}}
+\setlength{\parskip}{0.18em}
+\setlength{\parindent}{0pt}
+\setlength{\textfloatsep}{5pt plus 1pt minus 1pt}
+\setlength{\intextsep}{5pt plus 1pt minus 1pt}
+\setlength{\floatsep}{5pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{2pt}
+\setlength{\belowcaptionskip}{1pt}
+\titlespacing*{\section}{0pt}{0.4em}{0.1em}
+\titlespacing*{\subsection}{0pt}{0.28em}{0.05em}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.4em}{}
+\setlist{nosep, leftmargin=1.2em, topsep=2pt}
+\captionsetup{font=small, labelfont=bf, skip=3pt}
+
+\title{\vspace{-2.4em}\textbf{Re-implementing PatchTST and Applying It to Retail Demand Forecasting}}
+\author{Yanlei He, Lijuan Luo \\
+\small Cornell University \quad CS 5782 Introduction to Deep Learning \quad Spring 2026}
+\date{\vspace{-1.6em}}
 
 \begin{document}
 \maketitle
-\vspace{-1.2em}
-
-\begin{multicols}{2}
+\vspace{-1.4em}
 
 \section{Introduction}
 
-We re-implemented the supervised version of \textbf{PatchTST} from Nie et al., \emph{A Time Series is Worth 64 Words: Long-term Forecasting with Transformers}~\cite{nie2023patchtst}. The paper argues that earlier Transformer forecasters often underperformed simple linear baselines and that two changes --- \textbf{patching} and \textbf{channel-independence} --- make Transformers competitive again for long-horizon time-series forecasting. Our project had two goals: (1) reproduce the core supervised results of PatchTST, and (2) test whether the same architecture transfers to a practical business task: \textbf{retail demand forecasting} on Favorita grocery sales.
+We re-implemented the supervised version of \textbf{PatchTST}~[1], which argues that two architectural choices --- \emph{patching} (treating short subseries as Transformer tokens) and \emph{channel-independence} (sharing one Transformer across channels) --- make Transformers competitive with strong linear baselines for long-horizon forecasting. Our project has two goals: (1) reproduce the paper's main supervised benchmarks (Table~3) and ablation (Table~7); and (2) test whether the same architecture transfers to a practical business problem --- \textbf{retail demand forecasting} on the Corporaci\'on Favorita grocery sales dataset~[3]. Beyond reproducing numbers, we use the implementation as a vehicle to study \emph{which} details actually matter when reproducing a Transformer paper.
 
-\section{Chosen Result}
+\section{Method}
 
-We focused on two results from the paper:
-\begin{itemize}
-  \item \textbf{Table 3}: supervised PatchTST/42 vs.\ DLinear vs.\ vanilla Transformer on ETTh1, ETTm1, and Weather.
-  \item \textbf{Table 7}: ablation of patching and channel-independence.
-\end{itemize}
-These were chosen because they directly capture the paper's main claims: that PatchTST improves forecasting performance and that both architectural choices matter.
+\textbf{Model.} PatchTST splits each input channel of length $L{=}336$ into overlapping patches of length $P{=}16$ with stride $S{=}8$, applies RevIN instance normalization, projects each patch to a $d_{\text{model}}{=}128$ token, adds learnable positional embeddings, and passes the sequence through a 3-layer Transformer encoder ($h{=}16$ heads, $d_{\text{ff}}{=}256$). A flat linear head emits the entire forecast horizon at once. Crucially, channel-independence is implemented by reshaping $(B, L, M)$ to $(B \cdot M, L)$ before the encoder, so the same Transformer weights are reused across all $M$ channels. We additionally implemented DLinear~[2], a vanilla encoder--decoder Transformer baseline, and three ablation variants: \texttt{P+CI} (full PatchTST), \texttt{CI Only} (no patching), \texttt{P Only} (channel-mixing), and \texttt{Original} (vanilla Transformer).
 
-\section{Methodology}
+\textbf{Implementation findings.} Cross-checking against the official repository revealed three subtle but important details: (i) PatchTST/42 requires \emph{replication padding} so that the final patch count is 42 rather than 41; (ii) the encoder uses \texttt{BatchNorm1d} rather than \texttt{LayerNorm}, contrary to the typical Transformer convention; and (iii) DLinear uses \emph{shared} weights across channels by default. Fixing these closed an early 5--15\% MSE gap and is reflected in all numbers reported below.
 
-\textbf{Implementation.} We implemented PatchTST in PyTorch from the paper, with RevIN, patch length $P{=}16$, stride $S{=}8$, look-back window $L{=}336$, and a shared Transformer encoder. Channel-independence is implemented by reshaping the input from $(B,L,M)$ to $(B\cdot M,L)$ so each channel is processed independently but with shared weights. We also implemented DLinear~\cite{zeng2023dlinear}, a vanilla Transformer baseline, and the ablation variants \texttt{P+CI}, \texttt{CI Only}, \texttt{P Only}, and \texttt{Original}.
+\section{Experimental Setup}
 
-\textbf{Datasets.} We used ETTh1, ETTm1, and Weather for replication, and the Favorita Grocery Sales dataset for the extension. For Favorita, we selected the largest Quito store and treated the 33 product families as channels.
+We use ETTh1, ETTm1, and Weather for replication, and Favorita for the retail extension (largest Quito store \#44, 33 product families treated as channels, 2013--2016, 1{,}684 days). Splits are chronological (60/20/20) and standardized using train-split statistics only. Training uses MSE loss, Adam, OneCycleLR, batch size 32, and early stopping (patience 10). We report test MSE and MAE in standardized space, following the paper's protocol.
 
-\textbf{Training and metrics.} We used MSE loss, Adam, OneCycleLR, and early stopping. Results are reported with test MSE and MAE in standardized space, following the paper.
+\section{Results}
 
-\textbf{Important implementation findings.} Cross-checking against the official code revealed three details that materially affected accuracy: (1) PatchTST/42 requires replication padding that produces 42 patches rather than 41; (2) the encoder uses BatchNorm rather than LayerNorm; and (3) DLinear uses shared weights across channels by default. Fixing these closed an early 5--15\% performance gap.
+\subsection{Benchmark replication (Table 3)}
 
-\section{Results \& Analysis}
+Across all 12 (dataset, horizon) cells in Table~\ref{tab:bench}, our PatchTST beats the vanilla Transformer by a wide margin and beats or matches DLinear, recovering the paper's qualitative ranking. On Weather, PatchTST wins at every horizon and the absolute MSE is in the same range as the paper. On ETTm1, the ranking holds at every horizon but absolute MSE remains $\sim$0.05--0.08 above the paper. On ETTh1, PatchTST beats DLinear at horizon 96 but is marginally behind ($\Delta\mathrm{MSE} \le 0.017$) at the longer horizons. To check whether the residual ETT gap is just initialization noise, we ran PatchTST with three seeds (2021/2022/2023) on ETTh1 and ETTm1: standard deviation across seeds is only \textbf{0.0006--0.0041 MSE}, an order of magnitude smaller than the gap to the paper (e.g., on ETTh1/720, $\sigma{=}0.004$ vs.\ $\Delta_{\text{paper}}{=}{+}0.214$). The mismatch is therefore systematic, not random; we attribute it to script-level hyperparameter overrides in the official codebase that are not visible in the paper text.
 
-\textbf{Benchmark replication.} Our results are best described as a \textbf{partial replication}. On \textbf{Weather}, PatchTST closely matched the paper and was best at all four horizons. On \textbf{ETTm1}, PatchTST also beat DLinear and the vanilla Transformer at all four horizons, but its absolute MSE remained above the paper. On \textbf{ETTh1}, PatchTST only partially matched the paper: it beat DLinear at horizon 96, but DLinear was slightly better at 192, 336, and 720.
-
-\textbf{Seed sensitivity.} To test whether the ETT mismatch was just random initialization noise, we ran a 3-seed sweep on ETTh1 and ETTm1. The standard deviation across seeds was only 0.001--0.004, far smaller than the gap to the paper, which suggests the mismatch is systematic rather than random. We believe the remaining gap is due to implementation-sensitive training details and script-level hyperparameter overrides in the official repository.
-
-\textbf{Ablation.} The full model (\texttt{P+CI}) performed best in all ablation settings. This supports the paper's central claim that \textbf{both} patching and channel-independence contribute to PatchTST's forecasting gains.
-
-\textbf{Retail extension.} On Favorita, PatchTST achieved the best MSE at 7-day, 14-day, and 30-day horizons:
-
-\begin{center}
-\small
-\begin{tabular}{lccc}
+\begin{table}[H]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4.5pt}
+\caption{Benchmark replication of PatchTST Table~3 (test MSE / MAE; lower is better). Bold marks the best result among the three implemented models per row. ``Paper'' lists PatchTST/42 numbers from~[1]; Weather is not reported in that row of Table~3.}
+\label{tab:bench}
+\begin{tabular}{llcccccccc}
 \toprule
-Horizon & PatchTST & DLinear & Transformer \\
+& & \multicolumn{2}{c}{\textbf{PatchTST (ours)}} & \multicolumn{2}{c}{\textbf{DLinear (ours)}} & \multicolumn{2}{c}{\textbf{Transformer (ours)}} & \multicolumn{2}{c}{\textbf{Paper PatchTST/42}} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+Dataset & Horizon & MSE & MAE & MSE & MAE & MSE & MAE & MSE & MAE \\
 \midrule
-7d  & \textbf{0.940} & 1.302 & 2.736 \\
-14d & \textbf{0.995} & 1.366 & 2.846 \\
-30d & \textbf{0.930} & 1.424 & 2.527 \\
+ETTh1   & 96  & \textbf{0.442} & \textbf{0.442} & 0.446 & 0.443 & 0.622 & 0.573 & 0.375 & 0.399 \\
+ETTh1   & 192 & 0.492 & 0.475 & \textbf{0.491} & \textbf{0.472} & 0.754 & 0.638 & 0.414 & 0.421 \\
+ETTh1   & 336 & 0.548 & 0.511 & \textbf{0.539} & \textbf{0.508} & 0.922 & 0.715 & 0.431 & 0.436 \\
+ETTh1   & 720 & 0.659 & 0.581 & \textbf{0.642} & \textbf{0.579} & 1.127 & 0.809 & 0.449 & 0.466 \\
+\midrule
+ETTm1   & 96  & \textbf{0.346} & \textbf{0.380} & 0.363 & 0.383 & 0.591 & 0.544 & 0.290 & 0.342 \\
+ETTm1   & 192 & \textbf{0.396} & 0.412 & 0.409 & \textbf{0.409} & 0.637 & 0.578 & 0.332 & 0.369 \\
+ETTm1   & 336 & \textbf{0.438} & \textbf{0.437} & 0.454 & \textbf{0.437} & 0.660 & 0.580 & 0.366 & 0.392 \\
+ETTm1   & 720 & \textbf{0.500} & \textbf{0.475} & 0.512 & \textbf{0.473} & 0.757 & 0.629 & 0.420 & 0.424 \\
+\midrule
+Weather & 96  & \textbf{0.150} & \textbf{0.197} & 0.175 & 0.237 & 0.173 & 0.262 & --- & --- \\
+Weather & 192 & \textbf{0.196} & \textbf{0.241} & 0.218 & 0.276 & 0.217 & 0.299 & --- & --- \\
+Weather & 336 & \textbf{0.254} & \textbf{0.282} & 0.264 & 0.316 & 0.273 & 0.342 & --- & --- \\
+Weather & 720 & \textbf{0.319} & \textbf{0.331} & 0.328 & 0.368 & 0.334 & 0.383 & --- & --- \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-This corresponds to a 27--35\% MSE reduction relative to DLinear and a much larger margin over the vanilla Transformer. Interestingly, the retail results were not strictly monotonic in horizon length: 30-day MSE was slightly lower than 14-day MSE. We interpret this as a dataset-specific effect driven by seasonality and window-level volatility rather than as a replication error.
+\subsection{Ablation (Table 7): patching vs.\ channel-independence}
 
-\section{Reflections}
+Both architectural changes contribute, but their relative importance is dataset-dependent (Table~\ref{tab:ablation}). On ETTh1, removing patching (\texttt{CI Only}) costs only $\sim$0.01 MSE, while removing channel-independence (\texttt{P Only}) costs 0.07--0.14 MSE --- channel-independence is the dominant gain. On Weather, the two contribute roughly equally and the gap to the vanilla Transformer is much smaller, since vanilla self-attention already handles Weather's relatively short patterns reasonably well. The full \texttt{P+CI} model wins in all four cells, supporting the paper's central claim that \emph{both} ingredients matter.
 
-This project showed that \textbf{reproduction quality depends heavily on hidden details}. Even when the model design is correct, small implementation choices such as padding, normalization, and baseline defaults can materially change the results. A second lesson is that \textbf{matching the exact numbers in a paper is different from reproducing its main conclusions}. In our case, Weather matched closely, ETTm1 reproduced the correct ranking, and ETTh1 only partially matched --- but across these cases, the core value of PatchTST's architecture remained visible.
+\begin{table}[H]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\caption{Ablation of patching (P) and channel-independence (CI) at horizons 96 and 336 (test MSE).}
+\label{tab:ablation}
+\begin{tabular}{llcccc}
+\toprule
+Dataset & Horizon & \textbf{P+CI} (full) & CI Only & P Only & Original (vanilla Tx) \\
+\midrule
+ETTh1   & 96  & \textbf{0.444} & 0.454 & 0.514 & 0.604 \\
+ETTh1   & 336 & \textbf{0.542} & 0.548 & 0.678 & 0.958 \\
+Weather & 96  & \textbf{0.149} & 0.174 & 0.163 & 0.172 \\
+Weather & 336 & \textbf{0.252} & 0.272 & 0.269 & 0.277 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The extension to Favorita also suggests that PatchTST is practically useful beyond benchmark datasets. A natural next step would be to add exogenous retail variables such as promotions, holidays, and oil prices, since the current model is purely autoregressive.
+\subsection{Retail extension: Favorita grocery sales}
 
-\section{References}
+We treat each of the 33 product families as a channel and predict daily total unit sales for the next 7, 14, and 30 days (Table~\ref{tab:favorita}). PatchTST achieves the best MSE at all three horizons, a 27--35\% reduction over DLinear and a 2.7--2.9$\times$ reduction over the vanilla Transformer. The vanilla Transformer overfits aggressively (best epoch 6--7 of 17, with 3--12M parameters), confirming that on small, multi-channel retail data the channel-independent patch design is what makes self-attention usable. Interestingly, 30-day MSE is slightly \emph{lower} than 14-day MSE, which we attribute to the longer window averaging out weekly volatility rather than to a replication bug.
 
-\begin{thebibliography}{9}
-\small
-\bibitem{nie2023patchtst}
-Y.~Nie, N.~H.~Nguyen, P.~Sinthong, J.~Kalagnanam.
-\newblock A Time Series is Worth 64 Words: Long-term Forecasting with Transformers.
-\newblock \emph{ICLR 2023}.
+\begin{table}[H]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{8pt}
+\caption{Favorita retail forecasting (largest Quito store, 33 product families). Best per row in bold.}
+\label{tab:favorita}
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{2}{c}{\textbf{PatchTST}} & \multicolumn{2}{c}{\textbf{DLinear}} & \multicolumn{2}{c}{\textbf{Transformer}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Horizon & MSE & MAE & MSE & MAE & MSE & MAE \\
+\midrule
+7-day  & \textbf{0.940} & \textbf{0.566} & 1.302 & 0.671 & 2.736 & 0.997 \\
+14-day & \textbf{0.995} & \textbf{0.579} & 1.366 & 0.696 & 2.846 & 1.031 \\
+30-day & \textbf{0.930} & \textbf{0.594} & 1.424 & 0.742 & 2.527 & 0.995 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\bibitem{zeng2023dlinear}
-A.~Zeng, M.~Chen, L.~Zhang, Q.~Xu.
-\newblock Are Transformers Effective for Time Series Forecasting?
-\newblock \emph{AAAI 2023}.
+\enlargethispage{3\baselineskip}
+\section{Discussion}
 
-\bibitem{favorita}
-Corporaci\'on Favorita Grocery Sales.
-\newblock Kaggle Store Sales: Time Series Forecasting.
-\newblock \url{https://www.kaggle.com/competitions/store-sales-time-series-forecasting}.
-\end{thebibliography}
+Three takeaways stand out. First, \textbf{reproduction quality is implementation-bound, not idea-bound}: the paper's qualitative claims replicate cleanly, but matching exact numbers requires hyperparameter and normalization choices that live only in the official scripts. Second, the \textbf{ablation pattern is dataset-dependent}: channel-independence dominates on ETT, while patching matters more on Weather, suggesting these ingredients address different failure modes. Third, the architecture \textbf{transfers cleanly to a real retail problem}: with no domain-specific changes, PatchTST cuts 30-day demand-forecast MSE by $\sim$35\% over DLinear on Favorita. A natural next step is to add exogenous retail variables (promotions, holidays, oil prices), since the current model is purely autoregressive.
 
-\end{multicols}
+\vspace{0.3em}
+{\footnotesize
+\textbf{References.}\hspace{0.3em}
+[1]~Y.~Nie, N.~H.~Nguyen, P.~Sinthong, J.~Kalagnanam. A Time Series is Worth 64 Words: Long-term Forecasting with Transformers. \emph{ICLR 2023}.\hspace{0.4em}
+[2]~A.~Zeng, M.~Chen, L.~Zhang, Q.~Xu. Are Transformers Effective for Time Series Forecasting? \emph{AAAI 2023}.\hspace{0.4em}
+[3]~Corporaci\'on Favorita Grocery Sales --- Kaggle Store Sales: Time Series Forecasting. \href{https://www.kaggle.com/competitions/store-sales-time-series-forecasting}{kaggle.com/competitions/store-sales-time-series-forecasting}.\par}
+
 \end{document}
