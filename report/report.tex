@@ -27,9 +27,8 @@
 \titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
 \setlist{nosep, leftmargin=1.3em}
 \captionsetup{font=small, skip=2pt}
-
 \title{\vspace{-2em}\textbf{Re-implementing PatchTST and Applying It to Retail Demand Forecasting}}
-\author{\small [Your Names] \\ \small Cornell University \quad CS 5782 \quad Spring 2026}
+\author{Yanlei He, Lijuan Luo \\ \small Cornell University \quad CS 5782 \quad Spring 2026}
 \date{\vspace{-1.5em}}
 
 \begin{document}
@@ -95,15 +94,17 @@ Weather & 720 & 0.320 & \textbf{0.319} & 0.329 & 0.334 \\
 \section{Reflections}\label{sec:reflections}
 
 \textbf{Lessons learned.}
-(i)~\emph{Patching off-by-one was the most impactful bug we caught from cross-checking.} A naive read of the paper produces 41 patches at $L{=}336$, $P{=}16$, $S{=}8$, but the paper's PatchTST/42 needs an explicit \texttt{ReplicationPad1d((0, stride))} that adds one more patch. Together with the BatchNorm vs.\ LayerNorm choice, fixing these closed an MSE gap of 5--15\%.
-(ii)~\emph{The paper text and the official scripts disagree on hyperparameters.} The paper's Appendix A.1.4 says ``Dropout with probability 0.2 is applied in the encoders for all experiments,'' which we faithfully implemented. But the official run scripts override this to dropout=0.3 (ETTh1) / 0.4 (ETTm1) and use batch\_size=128 instead of the more common 32. Our 3-seed sensitivity analysis showed the gap is systematic (std $\le$ 0.004) rather than seed noise --- a literal reading of the paper does not reproduce paper Table 3 exactly, even though Weather (where these script-level overrides matter less due to dataset size) does match.
-(iii)~\emph{Compute and storage constraints matter.} We initially planned all 8 paper datasets but switched to ETTh1+ETTm1+Weather after Traffic and Electricity (M=862, 321) would not fit on a Colab T4 --- the same OOM issue the paper reports in Table 7. We also adopted tier-aware artifact saving (checkpoint only when $<$30 MB) to fit Drive's 15 GB limit mid-run. Per-experiment JSON checkpoints + an \texttt{\_is\_experiment\_done()} resume helper turned a fragile 7-hour run into one we could pause and resume.
+\begin{itemize}
+    \item \emph{Patching off-by-one was the most impactful bug we caught from cross-checking.} A naive read of the paper produces 41 patches at $L{=}336$, $P{=}16$, $S{=}8$, but the paper's PatchTST/42 needs an explicit \texttt{ReplicationPad1d((0, stride))} that adds one more patch. Together with the BatchNorm vs.\ LayerNorm choice, fixing these closed an MSE gap of 5--15\%.
+\item \emph{The paper text and the official scripts disagree on hyperparameters.} The paper's Appendix A.1.4 says ``Dropout with probability 0.2 is applied in the encoders for all experiments,'' which we faithfully implemented. But the official run scripts override this to dropout=0.3 (ETTh1) / 0.4 (ETTm1) and use batch\_size=128 instead of the more common 32. Our 3-seed sensitivity analysis showed the gap is systematic (std $\le$ 0.004) rather than seed noise --- a literal reading of the paper does not reproduce paper Table 3 exactly, even though Weather (where these script-level overrides matter less due to dataset size) does match.
+\item \emph{Compute and storage constraints matter.} We initially planned all 8 paper datasets but switched to ETTh1+ETTm1+Weather after Traffic and Electricity (M=862, 321) would not fit on a Colab T4 --- the same OOM issue the paper reports in Table 7. We also adopted tier-aware artifact saving (checkpoint only when $<$30 MB) to fit Drive's 15 GB limit mid-run. Per-experiment JSON checkpoints + an \texttt{\_is\_experiment\_done()} resume helper turned a fragile 7-hour run into one we could pause and resume.
+\end{itemize}
 
 \textbf{Future work.}
-(a)~PatchTST is purely autoregressive, so it cannot use known future exogenous variables (promotions, holidays, oil price). Adding a side-channel embedding for these would directly improve Favorita forecasts.
-(b)~The paper shows that masked-patch self-supervised pre-training can transfer across datasets. We did not implement this --- it would be a natural next step and would let us ``pre-train on Weather, fine-tune on Favorita'' to see whether weather data carries useful inductive bias for retail.
-
-\textbf{AI tools.} We used Claude (Anthropic) as a coding assistant for debugging, training-loop scaffolding, figure generation, and notebook structure; the model architecture follows the paper directly and was cross-checked against the official repository.
+\begin{itemize}
+    \item PatchTST is purely autoregressive, so it cannot use known future exogenous variables (promotions, holidays, oil price). Adding a side-channel embedding for these would directly improve Favorita forecasts.
+    \item The paper shows that masked-patch self-supervised pre-training can transfer across datasets. We did not implement this --- it would be a natural next step and would let us ``pre-train on Weather, fine-tune on Favorita'' to see whether weather data carries useful inductive bias for retail.
+\end{itemize}
 
 \begin{thebibliography}{9}
 \small

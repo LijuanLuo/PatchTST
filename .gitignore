@@ -7,7 +7,8 @@ dist/
 build/
 
 # Data (too large for git)
-data/
+data/*
+!data/README.md
 
 # Model checkpoints / prediction dumps
 results/**/*.pt
@@ -27,3 +28,9 @@ Thumbs.db
 
 # Local tool state
 .claude/
+
+# LaTeX build artifacts
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc

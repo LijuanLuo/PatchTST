@@ -3,6 +3,8 @@
 **CS 5782 Introduction to Deep Learning — Final Project**  
 Cornell University, Spring 2026
 
+## Introduction
+
 This repository re-implements the supervised version of **PatchTST** from:
 
 Nie, Y., Nguyen, N. H., Sinthong, P., Kalagnanam, J.  
@@ -33,7 +35,16 @@ The project achieves a **partial replication** of PatchTST:
 - `ETTh1` is only partially reproduced: PatchTST beats DLinear at `96`, but trails DLinear at `192 / 336 / 720`.
 - The retail extension shows that PatchTST transfers well beyond the benchmark datasets and achieves the best MSE on all three retail horizons.
 
-## Repository layout
+## Chosen Result
+
+We focused on the paper's most central supervised forecasting results:
+
+- **Table 3**: PatchTST vs. DLinear vs. vanilla Transformer on `ETTh1`, `ETTm1`, and `Weather`
+- **Table 7**: ablation on patching and channel-independence
+
+These two results capture the paper's main claims: that PatchTST improves forecasting performance and that both architectural ideas matter.
+
+## GitHub Contents
 
 ```text
 Final project/
@@ -62,7 +73,7 @@ Final project/
 └── README.md
 ```
 
-## What was implemented
+## Re-implementation Details
 
 ### 1. Benchmark replication
 
@@ -121,7 +132,7 @@ We applied PatchTST to the **Favorita grocery sales** dataset:
 - daily sales forecasting
 - `7d / 14d / 30d` horizons
 
-## Key results
+## Results / Insights
 
 ### Benchmark summary
 
@@ -165,7 +176,7 @@ Poster-ready figures generated in this repo include:
 - [results/favorita/favorita_forecast_beverages_pred30.png](results/favorita/favorita_forecast_beverages_pred30.png)
 - [poster/poster.pdf](poster/poster.pdf)
 
-## Reproducing the project
+## Reproduction Steps
 
 ### Local setup
 
@@ -247,6 +258,12 @@ The GitHub repo is intended to store:
 - Poster QR code asset: [poster/assets/github_repo_qr.png](poster/assets/github_repo_qr.png)
 - Report source: [report/report.tex](report/report.tex)
 
-## Reference
+## References
 
 Nie et al., *A Time Series is Worth 64 Words: Long-term Forecasting with Transformers*, ICLR 2023.
+
+## Acknowledgements
+
+This project was completed for **CS 5782 Introduction to Deep Learning** at Cornell University in Spring 2026.
+
+We used AI coding assistance for debugging, plotting, and repository organization; the model design and experimental setup were implemented from the paper and checked against the official repository where needed.
