@@ -67,7 +67,7 @@ We focused on two results from the original paper. \textbf{Table~3} (supervised 
 
 \textbf{Ablation.} Both architectural changes contribute, but their relative importance is dataset-dependent (Table~\ref{tab:ablation}, Figure~\ref{fig:abl}). On ETTh1, removing patching (\texttt{CI Only}) costs only $\sim$0.01 MSE, while removing channel-independence (\texttt{P Only}) costs 0.07--0.14 MSE --- channel-independence is the dominant gain. On Weather, the two contribute roughly equally and the gap to the vanilla Transformer is much smaller, since vanilla self-attention already handles Weather's relatively short patterns. The full \texttt{P+CI} model wins in all four cells, supporting the paper's central claim that \emph{both} ingredients matter.
 
-\textbf{Retail extension.} We treat each of the 33 Favorita product families as a channel and predict daily sales for the next 7, 14, and 30 days (Figure~\ref{fig:fav}). PatchTST achieves the best MSE at all three horizons, a 27--35\% reduction over DLinear and a 2.7--2.9$\times$ reduction over the vanilla Transformer. The vanilla Transformer overfits aggressively (best epoch 6--7 of 17, with 3--12M parameters), confirming that on small, multi-channel retail data the channel-independent patch design is what makes self-attention usable. Interestingly, 30-day MSE is slightly \emph{lower} than 14-day MSE, which we attribute to the longer window averaging out weekly volatility rather than to a replication bug.
+\textbf{Retail extension.} We treat each of the 33 Favorita product families as a channel and predict daily sales for the next 7, 14, and 30 days (Figure~\ref{fig:fav}). PatchTST achieves the best MSE at all three horizons, a 27--35\% reduction over DLinear and a 2.7--2.9$\times$ reduction over the vanilla Transformer. The vanilla Transformer overfits aggressively (best epoch 6--7 of 17, with 3--12M parameters), confirming that on small, multi-channel retail data the channel-independent patch design is what makes self-attention usable. Interestingly, 30-day MSE is slightly \emph{lower} than 14-day MSE, which we attribute to the longer window averaging out weekly volatility rather than to a replication bug. Figure~\ref{fig:forecast} shows a qualitative 30-day forecast for the BEVERAGES family: PatchTST recovers the strong weekly cycle and the level reasonably well, with most error concentrated at the cycle peaks.
 
 \section{Reflections}
 
@@ -161,6 +161,13 @@ Weather & 336 & \textbf{0.252} & 0.272 & 0.269 & 0.277 \\
 \end{subfigure}
 \caption{Left: ablation heatmap reproduced from the poster's "Effect of Patching and CI" panel. Right: retail extension result from the poster's "Application: Marketing Extension" panel.}
 \label{fig:abl}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\linewidth]{favorita/favorita_forecast_beverages_pred30.png}
+\caption{Favorita 30-day forecast example for the BEVERAGES product family (poster's bottom-right panel). Gray = lookback history; blue = ground-truth held-out actuals; orange dashed = PatchTST forecast starting at the dotted vertical line. PatchTST recovers the weekly cycle and the absolute sales level; remaining error is concentrated at cycle peaks.}
+\label{fig:forecast}
 \end{figure}
 
 % ============================================================
