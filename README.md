@@ -267,5 +267,3 @@ Nie et al., *A Time Series is Worth 64 Words: Long-term Forecasting with Transfo
 ## Acknowledgements
 
 This project was completed for **CS 5782 Introduction to Deep Learning** at Cornell University in Spring 2026.
-
-We used AI coding assistance for debugging, plotting, and repository organization; the model design and experimental setup were implemented from the paper and checked against the official repository where needed.
