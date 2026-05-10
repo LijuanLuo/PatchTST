@@ -58,11 +58,8 @@ Final project/
 │   └── requirements.txt
 ├── poster/
 │   ├── poster.pdf
-│   ├── assets/
-│   │   └── github_repo_qr.png
 │   └── figures/
 ├── report/
-│   ├── group113_PatchTST_2page_report.tex
 │   └── group113_PatchTST_2page_report.pdf
 ├── results/
 │   ├── benchmark/
@@ -250,15 +247,13 @@ The GitHub repo is intended to store:
 - source code
 - experiment summaries
 - generated figures
-- poster assets
-- report sources
+- poster files
+- final report PDF
 
 ## Poster and report
 
 - Poster PDF: [poster/poster.pdf](poster/poster.pdf)
-- Poster QR code asset: [poster/assets/github_repo_qr.png](poster/assets/github_repo_qr.png)
 - Report PDF: [report/group113_PatchTST_2page_report.pdf](report/group113_PatchTST_2page_report.pdf)
-- Report source: [report/group113_PatchTST_2page_report.tex](report/group113_PatchTST_2page_report.tex)
 
 ## References
 
